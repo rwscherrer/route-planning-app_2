@@ -1,0 +1,122 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or any plugin's vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ *= require_tree .
+ *= require_self
+ *= require app
+ *= require blocks
+ *= require custom
+ *= require style
+ *= require css-rtl/app-rtl
+ *= require css-rtl/blocks-rtl
+ *= require css-rtl/custom-rtl
+ *= require css-rtl/ie8-rtl
+ *= require css-rtl/plugins-rtl
+ *= require css-rtl/rtl
+ *= require css-rtl/style-rtl
+ *= require footers/footer-default
+ *= require footers/footer-v1
+ *= require footers/footer-v2
+ *= require footers/footer-v3
+ *= require footers/footer-v4
+ *= require footers/footer-v5
+ *= require footers/footer-v6
+ *= require footers/footer-v7
+ *= require headers/header-default
+ *= require headers/header-v1
+ *= require headers/header-v2
+ *= require headers/header-v3
+ *= require headers/header-v4
+ *= require headers/header-v5
+ *= require headers/header-v6
+ *= require headers/header-v7
+ *= require headers/header-v8
+ *= require pages/blog_magazine
+ *= require pages/blog_masonry_3col
+ *= require pages/blog
+ *= require pages/page_404_error
+ *= require pages/page_404_error1
+ *= require pages/page_404_error2
+ *= require pages/page_404_error3
+ *= require pages/page_404_error4
+ *= require pages/page_404_error5
+ *= require pages/page_404_error6
+ *= require pages/page_about
+ *= require pages/page_clients
+ *= require pages/page_coming_soon_v1
+ *= require pages/page_coming_soon_v2
+ *= require pages/page_coming_soon_v3
+ *= require pages/page_coming_soon_v4
+ *= require pages/page_coming_soon_v5
+ *= require pages/page_coming_soon_v6
+ *= require pages/page_coming_soon
+ *= require pages/page_contact
+ *= require pages/page_error3_404
+ *= require pages/page_error4_404
+ *= require pages/page_faq1
+ *= require pages/page_intro
+ *= require pages/page_invoice
+ *= require pages/page_job_inner
+ *= require pages/page_job_inner1
+ *= require pages/page_job_inner2
+ *= require pages/page_job
+ *= require pages/page_log_reg_v1
+ *= require pages/page_log_reg_v2
+ *= require pages/page_log_reg_v3
+ *= require pages/page_log_reg_v4
+ *= require pages/page_misc_sticky_footer
+ *= require pages/page_one
+ *= require pages/page_pricing
+ *= require pages/page_promo
+ *= require pages/page_search_inner_tables
+ *= require pages/page_search_inner
+ *= require pages/page_search
+ *= require pages/portfolio-v1
+ *= require pages/portfolio-v2
+ *= require pages/profile
+ *= require pages/shortcode_timeline1
+ *= require pages/shortcode_timeline2
+ *= require pages/pricing/pricing_accord
+ *= require pages/pricing/pricing_v1
+ *= require pages/pricing/pricing_v2
+ *= require pages/pricing/pricing_v3
+ *= require pages/pricing/pricing_v4
+ *= require pages/pricing/pricing_v5
+ *= require pages/pricing/pricing_v6
+ *= require pages/pricing/pricing_v7
+ *= require pages/pricing/pricing_v8
+ *= require pages/pricing/pricing-bg-colored
+ *= require pages/pricing/pricing-dark
+ *= require pages/pricing/pricing-light
+ *= require pages/pricing/pricing-medium-dark
+ *= require pages/pricing/pricing-medium-light
+ *= require pages/pricing/pricing-mega-v1
+ *= require pages/pricing/pricing-mega-v2
+ *= require pages/pricing/pricing-mega-v3
+ *= require pages/pricing/pricing-rounded
+ *= require pages/pricing/pricing-zoom
+ *= require pages/pricing/pricing
+ *= require plugins/style-switcher
+ *= require theme-colors/aqua
+ *= require theme-colors/blue
+ *= require theme-colors/brown
+ *= require theme-colors/dark-blue
+ *= require theme-colors/dark-red
+ *= require theme-colors/default
+ *= require theme-colors/light-green
+ *= require theme-colors/light
+ *= require theme-colors/orange
+ *= require theme-colors/purple
+ *= require theme-colors/red
+ *= require theme-colors/teal
+ *= require theme-skins/dark
+ */

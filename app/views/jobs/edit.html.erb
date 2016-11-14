@@ -1,0 +1,44 @@
+<h1>Edit A Job</h1>
+
+<%= form_tag "/jobs/#{ @job.id }", method: :patch do %>
+  <div>
+    <%= label_tag :name %>
+    <%=  text_field_tag :name, @job.name %>
+  </div>
+
+    <div>
+    <%= label_tag :address_1 %>
+    <%=  text_field_tag :address_1, @job.address_1 %>
+  </div>
+
+  <div>
+    <%= label_tag :city %>
+    <%=  text_field_tag :city, @job.city %>
+  </div>
+
+  <div>
+    <%= label_tag :state %>
+    <%=  text_field_tag :state, @job.state %>
+  </div>
+
+  <div>
+    <%= label_tag :zip %>
+    <%=  text_field_tag :zip, @job.zip %>
+  </div>
+
+  <div>
+    <%= label_tag :email %>
+    <%=  text_field_tag :email, @job.email %>
+  </div>
+
+  <div>
+    <%= label_tag :phone_number %>
+    <%=  text_field_tag :phone_number, @job.phone_number %>
+  </div>
+    <div>
+    <%= label_tag :duration %>
+    <%=  text_field_tag :duration, @job.duration %>
+  </div>
+  <button type="submit" class="btn btn-default-outline">Submit</button>
+
+  <% end %>

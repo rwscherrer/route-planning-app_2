@@ -1,0 +1,30 @@
+
+<span>
+<button ><%= link_to 'Edit', "/jobs/#{@job.id}/edit" %></button>
+<button> <%= link_to 'Delete', "/jobs/#{@job.id}", method: :delete %></button>
+</span>
+
+<h1>Name: <%= @job.name %> </h1>
+<h2>Address: <%= @job.address_1 %></h2>
+<h2>City: <%= @job.city %></h2>
+<h2>State: <%= @job.state %></h2>
+<h2>Zip: <%= @job.zip %></h2>
+<h2>Email: <%= @job.email %></h2>
+<h2>Phone: <%= @job.phone_number %></h2>
+
+
+
+  <section>
+    <div>
+      <%= form_tag '/carted_products', method: :post do %>
+        <%= hidden_field_tag :job_id, @job.id %>
+        <%= hidden_field_tag :duration, @duration %>
+    
+      <%= submit_tag 'Add To Jobs List!', class: "btn btn-default-outline"%>
+      <% end %>  
+       
+    </div>
+  </section>
+
+
+<section>

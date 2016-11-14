@@ -1,0 +1,10 @@
+<h1><%= @order.user.name.titleize %> Your Jobs For Today!</h1>
+
+
+<% @order.carted_products.each do |carted_product| %>
+  <h3><%= carted_product.job.name %> <%= carted_product.job.address_1 %> <%= carted_product.job.city %></h3>
+
+<% end %>
+
+
+

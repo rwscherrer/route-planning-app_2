@@ -1,0 +1,77 @@
+
+
+ <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+  $( function() {
+    $( "#sortable" ).sortable();
+    $( "#sortable" ).disableSelection();
+  } );
+
+ 
+
+  function reorganize() {
+    var newArray = document.querySelectorAll('h2.jobs-ordered')
+    var idsArray = [];
+    for(i=0; i < newArray.length; i++) { 
+      idsArray.push(newArray[i].id);
+    }
+    console.log(idsArray);
+
+    $.ajax({
+      method: "patch",
+      url: "/carted_products/update_row_order",
+      header: {Accept: "application/json"},
+      data: {ids: idsArray},
+      success: function() {
+        console.log('hi');
+      },
+      error: function() {
+        console.log(':(');
+      }
+    });
+
+
+
+    
+  };
+  </script>
+
+
+<h1>My Jobs List</h1>
+<h2> Today's Hours: <%= @sum %> </h2>
+ 
+
+  <div id="sortable">
+    <% @carted_products.each do |carted_product| %>
+      <div draggable="true">
+        <h2 id="<%= carted_product.id %>" class="jobs-ordered">
+          <%= carted_product.job.name %> <%= carted_product.job.address_1 %> <%= carted_product.job.city %> Dur(<%= carted_product.job.duration %>) - id(<%= carted_product.id %>) - Pri:<%= carted_product.priority %>
+            Row: <%= carted_product.row_order %>
+
+
+          <button><%= link_to 'Remove', "/carted_products/#{carted_product.id}", method: :delete %></button>
+          <button><%= link_to 'Edit', "/carted_products/#{carted_product.id}/edit" %></button>
+        
+        </h2>
+      </div>
+    <% end %>
+    <button onclick="reorganize()">Set Order</button>
+  </div>
+
+
+  
+ 
+
+ 
+
+<%= link_to 'Select More Jobs', '/jobs', method: :get, class: 'btn btn-success' %>
+
+<%= link_to 'Commit My Jobs!', '/orders', method: :post, class: 'btn btn-danger' %>
+
+
+
+      
