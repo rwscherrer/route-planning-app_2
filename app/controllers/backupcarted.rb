@@ -1,9 +1,17 @@
 class CartedProductsController < ApplicationController
+  skip_before_action :verify_authenticity_token
   before_action :authenticate_user!
+
+  
   
   def index
     if current_user && current_user.currently_carted.any?
-      @carted_products = current_user.currently_carted.order(:priority).reverse_order
+      @carted_products = current_user.currently_carted
+      unless params[:order] = "assigned"
+        @carted_products.order(:priority).reverse_order
+      else
+        @carted_products.order(:row_order).reverse_order
+      end
     else
       flash[:warning] = "Please add items to cart."
       redirect_to '/'
@@ -19,6 +27,9 @@ class CartedProductsController < ApplicationController
     duration_array.each { |e| @sum += e }
 
   end
+
+
+ 
 
   def create
     CartedProduct.create(job_id: params[:job_id],
@@ -46,48 +57,52 @@ class CartedProductsController < ApplicationController
     redirect_to "/carted_products"
   end
 
+  def update_row_order
+    puts "********************"
+    puts "********************"
+    puts "********************"
+    p params[:ids]
+    collection = []
+    params[:ids].each_with_index do |id, i|
+      @carted_product = CartedProduct.find(id.to_i)
+      @carted_product.row_order = (i + 1)
+      @carted_product.save
+      collection << @carted_product
+    end
+    p collection
+    puts "********************"
+    puts "********************"
+    puts "********************"
+   
+    render json: collection, code: 200
+  end
+
   def distance
     @carted_products = current_user.currently_carted
 
-    # @carted_jobs = []
-
-    # counter = 1
-    # @carted_products.each do |carted_product|
-    #   @carted_jobs << "job_#{counter}"
-    #   @carted_jobs << carted_product.job.id
-    #   @carted_jobs << carted_product.job.name 
-    #   @carted_jobs << carted_product.job.full_address
-    #   @carted_jobs << carted_product.priority
-    #   @carted_jobs << carted_product.job.in_progress
-    #   @carted_jobs << carted_product.job.to_coordinates
-
-    #   counter += 1
-    # end
 
 
     @jobs_hash = []
     @carted_products.each do |carted_product|
-      @carted_hash = 
+    @carted_hash = 
               {
-                "num" => carted_product.job.id,
+                "job_id" => carted_product.job.id,
                 "name" => carted_product.job.name,
                 "priority" => carted_product.priority,
+                "address" => carted_product.job.full_address,
+                "city" => carted_product.job.city,
+                "last_service" => carted_product.job.days_between,
                 "in_progress" => carted_product.job.in_progress,
-                "to_coordinates" => carted_product.job.to_coordinates
+                "to_coordinates" => carted_product.job.to_coordinates,
+                "row_order" => carted_product.row_order
               }
               
               
               @jobs_hash.push(@carted_hash)
 
-        
-    end
+      
+  end
 
-
-    # @hash_hash = @hash_hash.sort_by{|k,v |v}
-
-    @hash_flatten = @jobs_hash.flatten
-
-    # @hash = @hash_test[0]['to_coordinates']
 
     @name = @jobs_hash.sort_by { |a, b| a['name'] }
 
@@ -99,9 +114,11 @@ class CartedProductsController < ApplicationController
 
     @priority.each do |priority|
       if priority['in_progress'] == true
-        @in_progress << priority 
+        @in_progress << priority
       end
     end
+
+    @in_progress = @in_progress.sort_by { |a, b| -a['priority'] }
 
     @priority.each do |priority|
       if @in_progress.include?(priority) == false
@@ -109,282 +126,190 @@ class CartedProductsController < ApplicationController
       end
     end
 
+    
+
+    @testy = @carted_products.each do
+      CartedProduct.rank(:row_order)
+    end
 
 
+    @first_job = @in_progress.take(1)[0]
+    @first_city = @first_job['city']
+
+    @destinations = []
+    @in_progress.each do |job|
+      if @first_job.include?(job) == false
+        @destinations << job
+      end
+    end
 
 
+    # @origin_coord = @first_job['to_coordinates'][0].to_s + ',' + @first_job['to_coordinates'][1].to_s
 
+    @destination_coord = []
 
-    # @cart_hash = []
+    
 
+    @destinations.each do |destination|
+      @destination_coord << destination['to_coordinates'][0].to_s + ',' + destination['to_coordinates'][1].to_s + '|'
+    end
 
-    # @carted_test = []
-
-
-
-    # counter = 1
-    # @carted_products.each do |carted_product|
-    #   @carted_test << [carted_product.job.id, carted_product.priority]
-    #     counter += 1
-    # end
 
    
+
+    @distance = []
     
+    @job_count = @in_progress.count
 
-    # @sorted = @carted_test.sort! { |k| k[0] }
+    @google_directions = Unirest.get("https://maps.googleapis.com/maps/api/directions/json?origin=41.778273,-87.9754344&destination=41.802735,-87.928432&waypoints=41.7950638,-87.9762138|41.798179,-87.954478|41.801996,-87.927916|41.7788275,-87.9746218|41.7964038,-87.9756373&key=AIzaSyBmQv9dqyhd61nrOBPai-c68aKA6ZbvTdo").body
 
-    # @sorted1 = @carted_jobs.slice(0..6)
+    @googer = 'distance ' + @google_directions['routes'][0]['legs'][0]['steps'][1]['distance']['text'] + ' ' + 'travel time ' + @google_directions['routes'][0]['legs'][0]['steps'][1]['duration']['text']
 
 
-    # @sorted_count = @sorted.count
+    # https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=41.778273,-87.9754344&destinations=41.7950638,-87.9762138|41.798179,-87.954478|41.801996,-87.927916&key=AIzaSyDl68biGLxKw0g3LwG2LlulP1YvuvcDALI
+     
+
+    # @dist = Geocoder::Calculations.distance_between(current_location, next_location)
+
+
+    # 6010 Cass Ave., Westmont, IL, 60559 to 15 W. Quincy St., Westmont, IL, 60559
+ 
+
+
+    @dist_count = 0
+    @next_dist = @dist_count
 
 
     
+    @in_progress.length.times do 
+      @dist = Geocoder::Calculations.distance_between(@in_progress[@dist_count]['to_coordinates'], @in_progress[@next_dist]['to_coordinates'])
+      @in_progress[@dist_count]['distance'] = @dist
+      @dist_count += 1
+    end
 
-    # @sort_test_1 = @sorted[0][0]
+    # @test = Geocoder::Calculations.distance_between(@in_progress[0]['to_coordinates'], @in_progress[1]['to_coordinates'])
+
+    @dist_sort = @in_progress.sort_by { |a| a['distance'] }
+
+    @priority_sort = @in_progress.sort_by { |a| -a['priority'] }
 
 
-    # @sorty = @sort_test_1
 
-    # @sort_test_2 = @carted_test[1]
-
-    
-
-    # count = 1
-    # @carted_products.each do |carted_product|
-    #   @cart_hash["job_num"] << carted_product.job.id
-    #   @cart_hash["priority"] << carted_product.priority
-    #   count += 1
+    # @in_progress.each do |job|
+    #   if job['in_progress'] = true
+    #     job['in_progress'] = 1
+    #   elsif job['in_progress'] = false
+    #     job['in_progress'] = 0
+    #   end
     # end
 
 
-    # @carted_job_count = @carted_products.count
-    # @carted_element_count = @carted_jobs.length / @carted_products.count
-    
-
-    # @test_stuff = @carted_jobs.in_groups(@carted_job_count)
-
-
-    # @job_number_position = 0
-    # @id_position = 1
-    # @job_name_position = 2
-    # @full_address_position = 3
-    # @priority_position = 4
-    # @in_progress_position = 5
-    # @coord_position = 6
-    # @dist_positiion = 7
-
-    # ele_count = 6
-
-
-    # stuff_count = @test_stuff.count
-
-    # if @test_stuff[stuff_count][in_progress_position] == true
-
-
-    # @test_prior = []
-    
-    # @next_carted_element = @carted_element_count -1
-
-
-    # @carted_job_1 = @carted_jobs[0..6]
-    # @carted_job_2 = @carted_jobs[7..13]
-    # @carted_job_3 = @carted_jobs[14..21]
-    # @carted_job_4 = @carted_jobs[22..27]
-    # @carted_job_5 = @carted_jobs[28..33]
-    # @carted_job_6 = @carted_jobs[34..39]
-    # @carted_job_7 = @carted_jobs[40..45]
-    # @carted_job_8 = @carted_jobs[46..51]
-    # @carted_job_9 = @carted_jobs[52..57]
-    # @carted_job_10 = @carted_jobs[58..63]
-    # @carted_job_11 = @carted_jobs[64..69]
-    # @carted_job_12 = @carted_jobs[70..75]
-    # @carted_job_13 = @carted_jobs[75..81]
-    # @carted_job_14 = @carted_jobs[82..87]
-    # @carted_job_15 = @carted_jobs[88..93]
-    # @carted_job_16 = @carted_jobs[94..99]
-    # @carted_job_17 = @carted_jobs[100..105]
-    # @carted_job_18 = @carted_jobs[106..111]
-    # @carted_job_19 = @carted_jobs[112..117]
-    # @carted_job_20 = @carted_jobs[118..123]
-
-
-    # @resort = 
-
-    # @resort["2"] << @
-
-    # @loop = 1
-
-    # @carted_job_count.times do
-    #   @carted_job_job"#{@loop}" = @carted_jobs[0..@next_carted_element]
-    #   @loop += 1
-    #   @carted_job_job"#{@loop}" = @carted_jobs[@next_carted_element + 1.. @next_carted_element * 2 -1]
   
 
-    # @carted_priority = []
 
-    # if @carted_job_1[@priority_position] > @carted_job_2[@priority_position] && @carted_job_1[@priority_position] > @carted_job_3[@priority_position]
-    #   @carted_priority << @carted_job_1
-    #   if @carted_job_2[@priority_position] > @carted_job_3[@priority_position]
-    #     @carted_priority << @carted_job_2
-    #     @carted_priority << @carted_job_3
-    #   elsif @carted_job_3[@priority_position] > @carted_job_2[@priority_position]
-    #     @carted_priority << @carted_job_3
-    #     @carted_priority << @carted_job_2
-    #   end
-    # elsif @carted_job_2[@priority_position] > @carted_job_1[@priority_position] && @carted_job_2[@priority_position] > @carted_job_3[@priority_position]
-    #   @carted_priority << @carted_job_2
-    #   if @carted_job_1[@priority_position] > @carted_job_3[@priority_position]
-    #     @carted_priority << @carted_job_1
-    #     @carted_priority << @carted_job_3
-    #   elsif @carted_job_3[@priority_position] > @carted_job_1[@priority_position]
-    #     @carted_priority << @carted_job_3
-    #     @carted_priority << @carted_job_1
-    #   end
-    # elsif @carted_job_3[priority_position] > @carted_job_1[@priority_position] && @carted_job_3[@priority_position] > @carted_job_2[@priority_position]
-    #   @carted_priority << @carted_job_3
-    #   @carted_priority << @carted_job_1
-    #   if @carted_job_1[@priority_position] > @carted_job_2[@priority_position]
-    #     @carted_priority << @carted_job_1
-    #     @carted_priority << @carted_job_2
-    #   elsif @carted_job_2[@priority_position] > @carted_job_1[@priority_position]
-    #     @carted_priority << @carted_job_2
-    #     @carted_priority << @carted_job_1
-    #   end
-    # end
+    # @distance_duration = Unirest.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=41.778273,-87.9754344|41.7950638,-87.9762138|41.798179,-87.954478|41.801996,-87.927916|41.7788275,-87.9746218|41.7964038,-87.9756373|41.816719,-88.010595&destinations=41.778273,-87.9754344|41.7950638,-87.9762138|41.798179,-87.954478|41.801996,-87.927916|41.7788275,-87.9746218|41.7964038,-87.9756373|41.816719,-88.010595&key=AIzaSyDl68biGLxKw0g3LwG2LlulP1YvuvcDALI").body
 
-    
-
-    # @carted_progress_priority = []
-
-    # if @carted_job_1[@in_progress_position] == true
-    #   @carted_progress_priority << @carted_job_1
-    # elsif @carted_job_2[@in_progress_position] == true
-    #   @carted_progress_priority << @carted_job_2
-    # elsif @carted_job_3[@in_progress_position] == true
-    #   @carted_progress_priority << @carted_job_3
-    # end
-
+  #   @dist_dur = {"destination_addresses"=>["6015-6099 Cass Ave, Westmont, IL 60559, USA", "13-15 W Quincy St, Westmont, IL 60559, USA", "6-8 N Prospect Ave, Clarendon Hills, IL 60514, USA", "63 Village Pl, Hinsdale, IL 60521, USA", "6000 Cass Ave, Westmont, IL 60559, USA", "12-14 N Cass Ave, Westmont, IL 60559, USA", "1018 39th St, Downers Grove, IL 60515, USA"], "origin_addresses"=>["6015-6099 Cass Ave, Westmont, IL 60559, USA", "13-15 W Quincy St, Westmont, IL 60559, USA", "6-8 N Prospect Ave, Clarendon Hills, IL 60514, USA", "63 Village Pl, Hinsdale, IL 60521, USA", "6000 Cass Ave, Westmont, IL 60559, USA", "12-14 N Cass Ave, Westmont, IL 60559, USA", "1018 39th St, Downers Grove, IL 60515, USA"], "rows"=>[{"elements"=>[{"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1960}, "duration"=>{"text"=>"4 mins", "value"=>248}, "status"=>"OK"}, {"distance"=>{"text"=>"2.5 mi", "value"=>4060}, "duration"=>{"text"=>"6 mins", "value"=>385}, "status"=>"OK"}, {"distance"=>{"text"=>"4.2 mi", "value"=>6749}, "duration"=>{"text"=>"11 mins", "value"=>644}, "status"=>"OK"}, {"distance"=>{"text"=>"197 ft", "value"=>60}, "duration"=>{"text"=>"1 min", "value"=>4}, "status"=>"OK"}, {"distance"=>{"text"=>"1.3 mi", "value"=>2016}, "duration"=>{"text"=>"4 mins", "value"=>255}, "status"=>"OK"}, {"distance"=>{"text"=>"4.5 mi", "value"=>7188}, "duration"=>{"text"=>"12 mins", "value"=>738}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"1.3 mi", "value"=>2042}, "duration"=>{"text"=>"4 mins", "value"=>267}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"1.5 mi", "value"=>2405}, "duration"=>{"text"=>"7 mins", "value"=>439}, "status"=>"OK"}, {"distance"=>{"text"=>"4.1 mi", "value"=>6590}, "duration"=>{"text"=>"12 mins", "value"=>728}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1983}, "duration"=>{"text"=>"4 mins", "value"=>263}, "status"=>"OK"}, {"distance"=>{"text"=>"0.4 mi", "value"=>637}, "duration"=>{"text"=>"3 mins", "value"=>186}, "status"=>"OK"}, {"distance"=>{"text"=>"3.4 mi", "value"=>5395}, "duration"=>{"text"=>"11 mins", "value"=>656}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"2.5 mi", "value"=>4060}, "duration"=>{"text"=>"7 mins", "value"=>401}, "status"=>"OK"}, {"distance"=>{"text"=>"1.3 mi", "value"=>2053}, "duration"=>{"text"=>"5 mins", "value"=>328}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"1.6 mi", "value"=>2505}, "duration"=>{"text"=>"6 mins", "value"=>368}, "status"=>"OK"}, {"distance"=>{"text"=>"2.5 mi", "value"=>4000}, "duration"=>{"text"=>"7 mins", "value"=>397}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1976}, "duration"=>{"text"=>"5 mins", "value"=>283}, "status"=>"OK"}, {"distance"=>{"text"=>"4.3 mi", "value"=>6877}, "duration"=>{"text"=>"12 mins", "value"=>704}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"4.1 mi", "value"=>6628}, "duration"=>{"text"=>"11 mins", "value"=>652}, "status"=>"OK"}, {"distance"=>{"text"=>"2.7 mi", "value"=>4404}, "duration"=>{"text"=>"11 mins", "value"=>653}, "status"=>"OK"}, {"distance"=>{"text"=>"1.6 mi", "value"=>2534}, "duration"=>{"text"=>"7 mins", "value"=>390}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"4.1 mi", "value"=>6568}, "duration"=>{"text"=>"11 mins", "value"=>648}, "status"=>"OK"}, {"distance"=>{"text"=>"2.7 mi", "value"=>4327}, "duration"=>{"text"=>"10 mins", "value"=>608}, "status"=>"OK"}, {"distance"=>{"text"=>"5.7 mi", "value"=>9186}, "duration"=>{"text"=>"16 mins", "value"=>972}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"197 ft", "value"=>60}, "duration"=>{"text"=>"1 min", "value"=>4}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1900}, "duration"=>{"text"=>"4 mins", "value"=>243}, "status"=>"OK"}, {"distance"=>{"text"=>"2.5 mi", "value"=>4000}, "duration"=>{"text"=>"6 mins", "value"=>381}, "status"=>"OK"}, {"distance"=>{"text"=>"4.2 mi", "value"=>6689}, "duration"=>{"text"=>"11 mins", "value"=>640}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1956}, "duration"=>{"text"=>"4 mins", "value"=>251}, "status"=>"OK"}, {"distance"=>{"text"=>"4.4 mi", "value"=>7129}, "duration"=>{"text"=>"12 mins", "value"=>734}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"1.3 mi", "value"=>2016}, "duration"=>{"text"=>"4 mins", "value"=>241}, "status"=>"OK"}, {"distance"=>{"text"=>"0.1 mi", "value"=>205}, "duration"=>{"text"=>"1 min", "value"=>65}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1976}, "duration"=>{"text"=>"5 mins", "value"=>292}, "status"=>"OK"}, {"distance"=>{"text"=>"2.7 mi", "value"=>4298}, "duration"=>{"text"=>"10 mins", "value"=>599}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1956}, "duration"=>{"text"=>"4 mins", "value"=>237}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"3.3 mi", "value"=>5363}, "duration"=>{"text"=>"9 mins", "value"=>545}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"4.6 mi", "value"=>7348}, "duration"=>{"text"=>"12 mins", "value"=>703}, "status"=>"OK"}, {"distance"=>{"text"=>"3.5 mi", "value"=>5570}, "duration"=>{"text"=>"10 mins", "value"=>603}, "status"=>"OK"}, {"distance"=>{"text"=>"4.3 mi", "value"=>6875}, "duration"=>{"text"=>"11 mins", "value"=>675}, "status"=>"OK"}, {"distance"=>{"text"=>"5.7 mi", "value"=>9223}, "duration"=>{"text"=>"16 mins", "value"=>955}, "status"=>"OK"}, {"distance"=>{"text"=>"4.5 mi", "value"=>7288}, "duration"=>{"text"=>"12 mins", "value"=>699}, "status"=>"OK"}, {"distance"=>{"text"=>"3.3 mi", "value"=>5365}, "duration"=>{"text"=>"9 mins", "value"=>538}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}]}], "status"=>"OK"}
 
  
 
-    # if @carted_progress_priority.include?(@carted_job_1) == false
-    #   @carted_progress_priority << @carted_job_1
-    # end
-
-    # if @carted_progress_priority.include?(@carted_job_2) == false
-    #   @carted_progress_priority << @carted_job_2
-    # end
-
-    # if @carted_progress_priority.include?(@carted_job_3) == false
-    #   @carted_progress_priority << @carted_job_3
-    # end
 
   
 
-    # @carted_progress_priority_order = []
-    # @carted_progress_priority_order << @carted_progress_priority[0][0]
-    # @carted_progress_priority_order << @carted_progress_priority[1][0]
-    # @carted_progress_priority_order << @carted_progress_priority[2][0]
+
+    @final_order = []
+
+    @in_progress.each do |job|
+      if job['in_progress'] == true
+        @final_order << job
+      end
+    end
+
+    @in_progress.each do |job|
+      if @final_order.include?(job) == false 
+        @final_order << job
+      end
+
+    end
+
+    @city_list = []
+
+    @final_order.each do |job|
+      if @city_list.include?(job['city']) == false
+        @city_list << job['city']
+      end
+    end
+
+    # @weather = Unirest.get("https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22'#{@city}'%2C%20il%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys").body
+
+    # @conditions = @weather['query']['results']['channel']['item']['forecast'][0]['text']
+
+    @weather_stuff =[]
+
+    @city_list.each do |city|
+     @weather_stuff << city
+     city = @city
+     @weather_stuff << @conditions
+    end
+
+    # @final_order.each do |job|
+      
 
 
-    # @job_1_job_2 = Geocoder::Calculations.distance_between(@carted_progress_priority[0][6], @carted_progress_priority[1][6])
-    # @job_1_job_3 = Geocoder::Calculations.distance_between(@carted_progress_priority[0][6], @carted_progress_priority[2][6])
-    # @job_2_job_3 = Geocoder::Calculations.distance_between(@carted_progress_priority[1][6], @carted_progress_priority[2][6])
+  
+
+    @remaining = []
+
+    @remaining = @remaining.sort_by { |a| -a['priority'] }
+
+    # @final_order = @final_order.sort_by { |a| -a['priority'] }
+
+    # @nearby = Job.near(@final_order[0]['address'], 3, distance)
+
+    count = 0
+
+    @jobs_hash.each do |job|
+      @cities = {
+        'city' => job['city'],
+        'forecast' => "this is the forecast"
+
+      }
+    end
 
 
 
-    # @carted_prog_prior_dist = []
-    # if @carted_job_1[@in_progress_position] == true
-    #   @carted_prog_prior_dist << @carted_job_1
-    # elsif @carted_job_2[@in_progress_position] == true
-    #   @carted_prog_prior_dist << @carted_job_2
-    # elsif @carted_job_3[@in_progress_position] == true
-    #   @carted_prog_prior_dist << @carted_job_3   
+    # @weather = Unirest.get("https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22'#{@city}'%2C%20il%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys").body
+
+    # @city = 'westmont'
+    # @conditions = @weather['query']['results']['channel']['item']['forecast']
+
+
+
+    # @job_forecast = @conditions[0]['text'] + ' ' + "high: " + @conditions[0]['high'] + ' ' + "low: " + @conditions[0]['low']
+
+
+
+    # @dist_count = 0
+
+    # @final_order.each do |job|
+    #   @city = job['city']
+    #   @weather = Unirest.get("https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22'#{@city}'%2C%20il%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys").body
+    #   @conditions = @weather['query']['results']['channel']['item']['forecast']
+    #   @final_order << job['forecast']
+    #   @dist_count += 1
     # end
 
-   # @testy = @carted_progress_priority
+    # @dist_count = 0
+    # @next_dist = @dist_count + 1
 
-   # @carted_progress_priority[0] << @job_1_job_2
-   # @carted_progress_priority[1] << @job_2_job_3
-   # @carted_progress_priority[2] << @job_1_job_3
+    # @final_order_dist = []
 
+    # @final_order.length.times do 
+    #   @dist = Geocoder::Calculations.distance_between(@in_progress[@dist_count]['to_coordinates'], @final_order[@next_dist]['to_coordinates'])
+    #   @final_order[@dist_count]['distance'] = @dist
+    #   @dist_count += 1
+    # end
 
-   #  if @carted_prog_prior_dist.include?(@carted_job_1) == false
-   #    @carted_prog_prior_dist << @carted_job_1
-   #  end
-
-   #  if @carted_prog_prior_dist.include?(@carted_job_2) == false
-   #    @carted_prog_prior_dist << @carted_job_2
-   #  end
-
-   #  if @carted_prog_prior_dist.include?(@carted_job_3) == false
-   #    @carted_prog_prior_dist << @carted_job_3
-   #  end
-
-    
-
-   #  if @carted_progress_priority[1][7] < @carted_progress_priority[2][7]
-   #    @carted_prog_prior_dist << @carted_job_3
-   #    @carted_prog_prior_dist << @carted_job_2
-   #    @carted_prog_prior_dist[0][7] = @job_1_job_3
-   #    @carted_prog_prior_dist[1][7] = @job_2_job_3
-   #    @carted_prog_prior_dist[2][7] = @job_1_job_2
-   #  elsif @carted_progress_priority[1][7] < @carted_progress_priority[2][7]
-   #    @carted_prog_prior_dist << @carted_job_2
-   #    @carted_prog_prior_dist << @carted_job_3
-   #    @carted_prog_prior_dist[0][7] = @job_1_job_2
-   #    @carted_prog_prior_dist[1][7] = @job_2_job_3
-   #    @carted_prog_prior_dist[2][7] = @job_1_job_3
-   #  end
-
-   #  @oranges = @progress_priority
-   
-
-
-   #  @cart_prog_prior_dist_job_1 = @carted_prog_prior_dist[0][0..7]
-   #  @cart_prog_prior_dist_job_2 = @carted_prog_prior_dist[1][0..7]
-   #  @cart_prog_prior_dist_job_3 = @carted_prog_prior_dist[2][0..7]
-
-   #  @final_job_count = @carted_products.count
-   #  @final_element_count = @carted_prog_prior_dist.length / @carted_products.count
-
-
-
-   #  @final_order = []
-
-   #  @carted_prog_prior_dist.each do |final|
-   #    if final[@in_progress_position] == true
-   #      @final_order << final
-   #    end
-   #  end
-
-   #  @not_final = []
-
-   #  @carted_prog_prior_dist.each do |distance|
-   #    if @final_order.include?(distance) == false
-   #      @not_final << distance 
-   #    end
-   #  end
-
-
-   #  if @not_final[0][@dist_positiion] < @not_final[1][@dist_positiion]
-   #    @final_order << @not_final[0]
-   #    @final_order << @not_final[1]
-   #    @final_order[0][7] = Geocoder::Calculations.distance_between(@final_order[0][6], @not_final[0][6])
-   #    @final_order[1][7] = Geocoder::Calculations.distance_between(@not_final[0][6], @not_final[1][6])
-   #    @final_order[2][7] = Geocoder::Calculations.distance_between(@not_final[1][6], @final_order[0][6])
-   #  elsif @not_final[1][@dist_positiion] < @not_final[0][@dist_positiion]
-   #    @final_order << @not_final[1]
-   #    @final_order << @not_final[0]
-   #    @final_order[0][7] = Geocoder::Calculations.distance_between(@final_order[0][6], @not_final[1][6])
-   #    @final_order[1][7] = Geocoder::Calculations.distance_between(@not_final[1][6], @not_final[0][6])
-   #    @final_order[2][7] = Geocoder::Calculations.distance_between(@not_final[0][6], @final_order[0][6])
-   #  end
-
-   #  @final_job_1 = @final_order[0][7]
-   #  @final_job_2 = @final_order[1][7]
-   #  @final_job_3 = @final_order[2][7]
 
 
   end
@@ -398,3 +323,4 @@ class CartedProductsController < ApplicationController
     redirect_to "/carted_products"
   end
 end
+
