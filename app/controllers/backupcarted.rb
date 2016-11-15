@@ -65,7 +65,8 @@ class CartedProductsController < ApplicationController
     collection = []
     params[:ids].each_with_index do |id, i|
       @carted_product = CartedProduct.find(id.to_i)
-      @carted_product.row_order = (i + 1)
+      p @carted_product
+      @carted_product.row_order = i + 1
       @carted_product.save
       collection << @carted_product
     end

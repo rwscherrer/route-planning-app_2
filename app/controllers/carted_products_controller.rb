@@ -6,13 +6,16 @@ class CartedProductsController < ApplicationController
   
   def index
     if current_user && current_user.currently_carted.any?
-      @carted_products = current_user.currently_carted
+      @carted_products = current_user.currently_carted.order(:row_order)
       unless params[:order] = "assigned"
         @carted_products.order(:priority).reverse_order
+        p "unless"
       else
         @carted_products.order(:row_order).reverse_order
+        p "else"
       end
     else
+      p "nothing in cart"
       flash[:warning] = "Please add items to cart."
       redirect_to '/'
     end
@@ -54,10 +57,12 @@ class CartedProductsController < ApplicationController
     @carted_product = CartedProduct.find(params[:id])
     @carted_product.update(priority: params[:priority])
 
+
     redirect_to "/carted_products"
   end
 
   def update_row_order
+    puts params[:ids]
     puts "********************"
     puts "********************"
     puts "********************"
@@ -73,6 +78,8 @@ class CartedProductsController < ApplicationController
     puts "********************"
     puts "********************"
     puts "********************"
+
+
    
     render json: collection, code: 200
   end
@@ -232,6 +239,8 @@ class CartedProductsController < ApplicationController
 
     end
 
+    @final_order = @final_order.sort_by { |i| i["row_order"]}
+
     @city_list = []
 
     @final_order.each do |job|
@@ -239,6 +248,19 @@ class CartedProductsController < ApplicationController
         @city_list << job['city']
       end
     end
+
+    @dist_count = 0
+    @next_dist = @dist_count
+
+    @final_order.length.times do 
+      @dist = Geocoder::Calculations.distance_between(@final_order[@dist_count]['to_coordinates'], @final_order[@next_dist]['to_coordinates'])
+      @final_order[@dist_count]['distance'] = @dist 
+      @dist_count +=1
+    end
+
+
+  
+
 
     # @weather = Unirest.get("https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22'#{@city}'%2C%20il%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys").body
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161106164036) do
+ActiveRecord::Schema.define(version: 20161114145705) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(version: 20161106164036) do
     t.float    "job_duration"
     t.boolean  "in_progress"
     t.integer  "row_order"
+    t.float    "distance"
   end
 
   create_table "categories", force: :cascade do |t|

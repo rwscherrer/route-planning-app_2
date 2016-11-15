@@ -1,37 +1,18 @@
 
- <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <link rel="stylesheet" href="/resources/demos/style.css">
 
-  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <script>
-  $( function() {
-    $( "#sortable" ).sortable();
-    $( "#sortable" ).disableSelection();
-  } );
 
- 
 
-  function reorganize() {
-    var newArray = document.querySelectorAll('h2.jobs-ordered')
+
     
-    }
-  };
-  </script>
 
-
-
-
-<div id="sortable">
     <%  @final_order.each do |job| %>
-      <div draggable="true" >
+  
         <h2><%= job['name'] %> </h2>
         <h3> <%= job['address'] %> </h3>
-        <h4> <b> Distance:</b> <%= job['distance'].round(2) %> <b>Priority: </b> <%= job['priority'] %> <b> In Progress </b><%= job['in_progress'] %> <%=  %></h4>
-      </div>
+        <h4> <b> Distance:</b> <%= job['distance'].round(2) %> <b>Priority: </b> <%= job['priority'] %> <b> In Progress </b><%= job['in_progress'] %> <%=  job['row_order']%></h4>
     <% end %>
-    <button onclick="reorganize()">Set Order</button>
-</div>
+
+
 
 
 
