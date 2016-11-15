@@ -12,7 +12,7 @@ html:after {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background: url(../../img/coming-soon/mobile.png) no-repeat center center / cover;
+
 	z-index: 1;
 	opacity: 1;
 	transition: all .3s;

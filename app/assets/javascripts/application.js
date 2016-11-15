@@ -19,8 +19,8 @@
 //= require app
 //= require custom
 //= require page_contacts
-//= require pages/blog-masonry
-//= require pages/blog-masonry2
+
+
 //= require pages/index
 //= require pages/page_coming_soon
 //= require pages/page_coming_soon2
@@ -31,7 +31,7 @@
 //= require plugins/datepicker
 //= require plugins/fancy-box
 //= require plugins/form-sliders
-//= require plugins/ladda-buttons
+
 //= require plugins/layer-slider-rtl
 //= require plugins/layer-slider
 //= require plugins/masking
@@ -45,7 +45,6 @@
 //= require plugins/revolution-slider
 //= require plugins/style-switcher-rtl
 //= require plugins/style-switcher
-//= require plugins/cube-portfolio
 //= require plugins/validation
 //= require plugins/vector-map
 //= require js/plugins/style-switcher

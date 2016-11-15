@@ -135,10 +135,6 @@ class CartedProductsController < ApplicationController
 
     
 
-    @testy = @carted_products.each do
-      CartedProduct.rank(:row_order)
-    end
-
 
     @first_job = @in_progress.take(1)[0]
     @first_city = @first_job['city']
@@ -151,7 +147,6 @@ class CartedProductsController < ApplicationController
     end
 
 
-    # @origin_coord = @first_job['to_coordinates'][0].to_s + ',' + @first_job['to_coordinates'][1].to_s
 
     @destination_coord = []
 
@@ -168,18 +163,8 @@ class CartedProductsController < ApplicationController
     
     @job_count = @in_progress.count
 
-    @google_directions = Unirest.get("https://maps.googleapis.com/maps/api/directions/json?origin=41.778273,-87.9754344&destination=41.802735,-87.928432&waypoints=41.7950638,-87.9762138|41.798179,-87.954478|41.801996,-87.927916|41.7788275,-87.9746218|41.7964038,-87.9756373&key=AIzaSyBmQv9dqyhd61nrOBPai-c68aKA6ZbvTdo").body
-
-    @googer = 'distance ' + @google_directions['routes'][0]['legs'][0]['steps'][1]['distance']['text'] + ' ' + 'travel time ' + @google_directions['routes'][0]['legs'][0]['steps'][1]['duration']['text']
 
 
-    # https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=41.778273,-87.9754344&destinations=41.7950638,-87.9762138|41.798179,-87.954478|41.801996,-87.927916&key=AIzaSyDl68biGLxKw0g3LwG2LlulP1YvuvcDALI
-     
-
-    # @dist = Geocoder::Calculations.distance_between(current_location, next_location)
-
-
-    # 6010 Cass Ave., Westmont, IL, 60559 to 15 W. Quincy St., Westmont, IL, 60559
  
 
 
@@ -194,7 +179,7 @@ class CartedProductsController < ApplicationController
       @dist_count += 1
     end
 
-    # @test = Geocoder::Calculations.distance_between(@in_progress[0]['to_coordinates'], @in_progress[1]['to_coordinates'])
+ 
 
     @dist_sort = @in_progress.sort_by { |a| a['distance'] }
 
@@ -202,21 +187,7 @@ class CartedProductsController < ApplicationController
 
 
 
-    # @in_progress.each do |job|
-    #   if job['in_progress'] = true
-    #     job['in_progress'] = 1
-    #   elsif job['in_progress'] = false
-    #     job['in_progress'] = 0
-    #   end
-    # end
-
-
   
-
-
-    # @distance_duration = Unirest.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=41.778273,-87.9754344|41.7950638,-87.9762138|41.798179,-87.954478|41.801996,-87.927916|41.7788275,-87.9746218|41.7964038,-87.9756373|41.816719,-88.010595&destinations=41.778273,-87.9754344|41.7950638,-87.9762138|41.798179,-87.954478|41.801996,-87.927916|41.7788275,-87.9746218|41.7964038,-87.9756373|41.816719,-88.010595&key=AIzaSyDl68biGLxKw0g3LwG2LlulP1YvuvcDALI").body
-
-  #   @dist_dur = {"destination_addresses"=>["6015-6099 Cass Ave, Westmont, IL 60559, USA", "13-15 W Quincy St, Westmont, IL 60559, USA", "6-8 N Prospect Ave, Clarendon Hills, IL 60514, USA", "63 Village Pl, Hinsdale, IL 60521, USA", "6000 Cass Ave, Westmont, IL 60559, USA", "12-14 N Cass Ave, Westmont, IL 60559, USA", "1018 39th St, Downers Grove, IL 60515, USA"], "origin_addresses"=>["6015-6099 Cass Ave, Westmont, IL 60559, USA", "13-15 W Quincy St, Westmont, IL 60559, USA", "6-8 N Prospect Ave, Clarendon Hills, IL 60514, USA", "63 Village Pl, Hinsdale, IL 60521, USA", "6000 Cass Ave, Westmont, IL 60559, USA", "12-14 N Cass Ave, Westmont, IL 60559, USA", "1018 39th St, Downers Grove, IL 60515, USA"], "rows"=>[{"elements"=>[{"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1960}, "duration"=>{"text"=>"4 mins", "value"=>248}, "status"=>"OK"}, {"distance"=>{"text"=>"2.5 mi", "value"=>4060}, "duration"=>{"text"=>"6 mins", "value"=>385}, "status"=>"OK"}, {"distance"=>{"text"=>"4.2 mi", "value"=>6749}, "duration"=>{"text"=>"11 mins", "value"=>644}, "status"=>"OK"}, {"distance"=>{"text"=>"197 ft", "value"=>60}, "duration"=>{"text"=>"1 min", "value"=>4}, "status"=>"OK"}, {"distance"=>{"text"=>"1.3 mi", "value"=>2016}, "duration"=>{"text"=>"4 mins", "value"=>255}, "status"=>"OK"}, {"distance"=>{"text"=>"4.5 mi", "value"=>7188}, "duration"=>{"text"=>"12 mins", "value"=>738}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"1.3 mi", "value"=>2042}, "duration"=>{"text"=>"4 mins", "value"=>267}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"1.5 mi", "value"=>2405}, "duration"=>{"text"=>"7 mins", "value"=>439}, "status"=>"OK"}, {"distance"=>{"text"=>"4.1 mi", "value"=>6590}, "duration"=>{"text"=>"12 mins", "value"=>728}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1983}, "duration"=>{"text"=>"4 mins", "value"=>263}, "status"=>"OK"}, {"distance"=>{"text"=>"0.4 mi", "value"=>637}, "duration"=>{"text"=>"3 mins", "value"=>186}, "status"=>"OK"}, {"distance"=>{"text"=>"3.4 mi", "value"=>5395}, "duration"=>{"text"=>"11 mins", "value"=>656}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"2.5 mi", "value"=>4060}, "duration"=>{"text"=>"7 mins", "value"=>401}, "status"=>"OK"}, {"distance"=>{"text"=>"1.3 mi", "value"=>2053}, "duration"=>{"text"=>"5 mins", "value"=>328}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"1.6 mi", "value"=>2505}, "duration"=>{"text"=>"6 mins", "value"=>368}, "status"=>"OK"}, {"distance"=>{"text"=>"2.5 mi", "value"=>4000}, "duration"=>{"text"=>"7 mins", "value"=>397}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1976}, "duration"=>{"text"=>"5 mins", "value"=>283}, "status"=>"OK"}, {"distance"=>{"text"=>"4.3 mi", "value"=>6877}, "duration"=>{"text"=>"12 mins", "value"=>704}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"4.1 mi", "value"=>6628}, "duration"=>{"text"=>"11 mins", "value"=>652}, "status"=>"OK"}, {"distance"=>{"text"=>"2.7 mi", "value"=>4404}, "duration"=>{"text"=>"11 mins", "value"=>653}, "status"=>"OK"}, {"distance"=>{"text"=>"1.6 mi", "value"=>2534}, "duration"=>{"text"=>"7 mins", "value"=>390}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"4.1 mi", "value"=>6568}, "duration"=>{"text"=>"11 mins", "value"=>648}, "status"=>"OK"}, {"distance"=>{"text"=>"2.7 mi", "value"=>4327}, "duration"=>{"text"=>"10 mins", "value"=>608}, "status"=>"OK"}, {"distance"=>{"text"=>"5.7 mi", "value"=>9186}, "duration"=>{"text"=>"16 mins", "value"=>972}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"197 ft", "value"=>60}, "duration"=>{"text"=>"1 min", "value"=>4}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1900}, "duration"=>{"text"=>"4 mins", "value"=>243}, "status"=>"OK"}, {"distance"=>{"text"=>"2.5 mi", "value"=>4000}, "duration"=>{"text"=>"6 mins", "value"=>381}, "status"=>"OK"}, {"distance"=>{"text"=>"4.2 mi", "value"=>6689}, "duration"=>{"text"=>"11 mins", "value"=>640}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1956}, "duration"=>{"text"=>"4 mins", "value"=>251}, "status"=>"OK"}, {"distance"=>{"text"=>"4.4 mi", "value"=>7129}, "duration"=>{"text"=>"12 mins", "value"=>734}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"1.3 mi", "value"=>2016}, "duration"=>{"text"=>"4 mins", "value"=>241}, "status"=>"OK"}, {"distance"=>{"text"=>"0.1 mi", "value"=>205}, "duration"=>{"text"=>"1 min", "value"=>65}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1976}, "duration"=>{"text"=>"5 mins", "value"=>292}, "status"=>"OK"}, {"distance"=>{"text"=>"2.7 mi", "value"=>4298}, "duration"=>{"text"=>"10 mins", "value"=>599}, "status"=>"OK"}, {"distance"=>{"text"=>"1.2 mi", "value"=>1956}, "duration"=>{"text"=>"4 mins", "value"=>237}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}, {"distance"=>{"text"=>"3.3 mi", "value"=>5363}, "duration"=>{"text"=>"9 mins", "value"=>545}, "status"=>"OK"}]}, {"elements"=>[{"distance"=>{"text"=>"4.6 mi", "value"=>7348}, "duration"=>{"text"=>"12 mins", "value"=>703}, "status"=>"OK"}, {"distance"=>{"text"=>"3.5 mi", "value"=>5570}, "duration"=>{"text"=>"10 mins", "value"=>603}, "status"=>"OK"}, {"distance"=>{"text"=>"4.3 mi", "value"=>6875}, "duration"=>{"text"=>"11 mins", "value"=>675}, "status"=>"OK"}, {"distance"=>{"text"=>"5.7 mi", "value"=>9223}, "duration"=>{"text"=>"16 mins", "value"=>955}, "status"=>"OK"}, {"distance"=>{"text"=>"4.5 mi", "value"=>7288}, "duration"=>{"text"=>"12 mins", "value"=>699}, "status"=>"OK"}, {"distance"=>{"text"=>"3.3 mi", "value"=>5365}, "duration"=>{"text"=>"9 mins", "value"=>538}, "status"=>"OK"}, {"distance"=>{"text"=>"1 ft", "value"=>0}, "duration"=>{"text"=>"1 min", "value"=>0}, "status"=>"OK"}]}], "status"=>"OK"}
 
  
 
@@ -238,6 +209,8 @@ class CartedProductsController < ApplicationController
       end
 
     end
+
+
 
     @final_order = @final_order.sort_by { |i| i["row_order"]}
 

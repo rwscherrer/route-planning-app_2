@@ -41,7 +41,6 @@
   </script>
 
 
-<h1>My Jobs List</h1>
 <h2> Today's Hours: <%= @sum %> </h2>
  
 
@@ -49,18 +48,21 @@
     <% @carted_products.each do |carted_product| %>
       <div draggable="true">
         <h2 id="<%= carted_product.id %>" class="jobs-ordered">
-          <%= carted_product.job.name %> <%= carted_product.job.address_1 %> <%= carted_product.job.city %> Dur(<%= carted_product.job.duration %>) - id(<%= carted_product.id %>) - Pri:<%= carted_product.priority %>
-            Row: <%= carted_product.row_order %>
+          <%= carted_product.job.name %> <%= carted_product.job.address_1 %> <%= carted_product.job.city %> 
+          
 
 
           <button><%= link_to 'Remove', "/carted_products/#{carted_product.id}", method: :delete %></button>
           <button><%= link_to 'Edit', "/carted_products/#{carted_product.id}/edit" %></button>
         
         </h2>
+        <h3> Duration: <%= carted_product.job.duration %> hrs. </h3>
       </div>
     <% end %>
     <button onclick="reorganize()">Set Order</button>
   </div>
+
+  <br>
 
 
   
@@ -68,9 +70,9 @@
 
  
 
-<%= link_to 'Select More Jobs', '/jobs', method: :get, class: 'btn btn-success' %>
+<button><%= link_to 'Select More Jobs', '/jobs', method: :get %></button>
 
-<%= link_to 'Commit My Jobs!', '/carted_products/distance', method: :get, class: 'btn btn-danger' %>
+<button><%= link_to 'Commit My Jobs!', '/carted_products/distance', method: :get %></button>
 
 
 
