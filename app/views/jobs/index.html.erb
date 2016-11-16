@@ -1,17 +1,18 @@
-<h1>All Jobs</h1>
+<h2>All Jobs</h2>
 
 
 
 
 <% @jobs.each do |job| %>
-  <h2> <%= job.id %>
-  <h2>Name: <%= link_to "#{job.name}", "/jobs/#{job.id}" %> </h2>
+ 
+  <h2><%= link_to "#{job.name}", "/jobs/#{job.id}" %> </h2>
   <h4><%= job.address_1 %> <%= job.city %>, <%= job.state %> <%= job.zip %></h4>
   <h1></h1>
   <h4>Email: <%= job.email %></h4>
+
   <h4>Last Visit: <%= job.friendly_service_date %></h4>
   <h4>Days Not Serviced: <%= job.days_between.floor %></h4>
-  <h4><%= job.to_coordinates %></h4>
+  
 
 
 

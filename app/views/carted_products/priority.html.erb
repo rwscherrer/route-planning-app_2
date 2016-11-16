@@ -1,0 +1,12 @@
+
+
+      <% @final_order = @final_order.sort_by { |i| -i["priority"]} %>
+
+
+    <%  @final_order.each do |job| %>
+  
+        <h2><%= job['name'] %> </h2>
+        <h3> <%= job['address'] %> </h3>
+        <h4> <b> Distance:</b> <%= job['distance'].round(2) %> <b>Priority: </b><%= job['priority'] %> <b> In Progress </b><%= job['in_progress'] %> </h4>
+        <h4> Conditions: <%= job['forecast'] %> Temp (High/Low): <%= job['high'] %> / <%= job['low'] %></h4>
+    <% end %>

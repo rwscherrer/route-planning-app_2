@@ -53,8 +53,8 @@ body.header-fixed-space-default {
 
 .header .topbar ul.loginbar > li > a,
 .header .topbar ul.loginbar > li > a:hover {
-	color: #7c8082;
-	font-size: 20px;
+	color: #207A34;
+	font-size: 25px;
 	text-transform: uppercase;
 }
 
@@ -131,6 +131,10 @@ body.header-fixed-space-default {
 /*No Topbar*/
 .header.no-topbar .navbar-toggle {
 	margin-top: 25px;
+}
+
+.img-circle {
+    border-radius: 50%;
 }
 
 /*--------------------------------------------------

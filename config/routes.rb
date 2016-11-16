@@ -39,8 +39,11 @@ Rails.application.routes.draw do
 
   get '/carted_products/distance' => 'carted_products#distance'
 
+  get '/carted_products/priority' => 'carted_products#priority'
+
   patch '/carted_products/update_row_order' => 'carted_products#update_row_order'
 
+  get '/carted_products/reorder' => 'carted_products#reorder'
 
   get '/carted_products/:id' => 'carted_products#show'
 

@@ -39,14 +39,25 @@
   };
   </script>
 
-
-<h2> Today's Hours: <%= @sum %> </h2>
  
+<h2> Today's Hours: <%= @sum %> </h2>
+
+   
+<h2><button><%= link_to 'Jobs By Priority', '/carted_products/priority', method: :get %></button>
+<button><%= link_to 'Jobs By Distance', '/carted_products/distance', method: :get %></button>
+<button onclick="reorganize()">Set Custom Order</button> <button><%= link_to 'Use My Order', '/carted_products/reorder', method: :get %></button>
+</h2>
+
+<br>
+<br>
+
+
 
   <div id="sortable">
     <% @carted_products.each do |carted_product| %>
       <div draggable="true">
         <h2 id="<%= carted_product.id %>" class="jobs-ordered">
+          <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true" style="color:#207A34"></span>
           <%= carted_product.job.name %> <%= carted_product.job.address_1 %> <%= carted_product.job.city %> 
           
 
@@ -58,21 +69,16 @@
         <h3> Duration: <%= carted_product.job.duration %> hrs. </h3>
       </div>
     <% end %>
-    <button onclick="reorganize()">Set Order</button>
   </div>
 
   <br>
+<h2>
+<button><%= link_to 'Select More Jobs', '/jobs', method: :get %></button></h2>
+
 
 
   
  
-
- 
-
-<button><%= link_to 'Select More Jobs', '/jobs', method: :get %></button>
-
-<button><%= link_to 'Commit My Jobs!', '/carted_products/distance', method: :get %></button>
-
 
 
       
